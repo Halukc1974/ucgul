@@ -9,7 +9,7 @@
         android:targetSdkVersion="34" />
 
     <application
-        android:label="Üçgen Alan Hesaplama"
+        android:label="Üçgül Forever"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"
