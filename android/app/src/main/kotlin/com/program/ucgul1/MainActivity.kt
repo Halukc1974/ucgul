@@ -10,6 +10,7 @@ import androidx.core.app.NotificationCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import androidx.annotation.NonNull
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.program.ucgul1/notifications"
@@ -60,7 +61,7 @@ class MainActivity: FlutterActivity() {
 
     private fun showNotification(id: Int, title: String, body: String) {
         val builder = NotificationCompat.Builder(this, notificationChannelId)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(com.program.ucgul1.R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
