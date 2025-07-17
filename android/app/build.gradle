@@ -7,23 +7,23 @@ plugins {
 android {
     namespace = "com.example.firestoredeneme"  // Uygulamanızın doğru namespace'ini buraya yazın
 
-    compileSdkVersion 34 // Compile SDK versiyonunu doğru şekilde tanımlıyoruz.
+    compileSdkVersion 33
 
     defaultConfig {
-        applicationId = "com.program.ucgul1"  // Burayı doğru şekilde değiştirin
-        minSdkVersion 23  // Minimum SDK versiyonunu burada tanımlıyoruz
-        targetSdkVersion 34  // Hedef SDK versiyonunu doğru bir şekilde tanımlıyoruz
+        applicationId = "com.program.ucgul1"
+        minSdkVersion 21
+        targetSdkVersion 33
         versionCode 1  // Uygulama versiyon kodu, genellikle her sürümde artar
         versionName "1.0.0"  // Uygulama versiyon adı
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '11'
     }
 
     buildTypes {
