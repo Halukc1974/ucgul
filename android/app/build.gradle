@@ -10,20 +10,26 @@ android {
     compileSdkVersion 33
 
     defaultConfig {
-        applicationId = "com.program.ucgul1"
+        applicationId "com.program.ucgul1"
         minSdkVersion 21
         targetSdkVersion 33
+        multiDexEnabled true
         versionCode 1  // Uygulama versiyon kodu, genellikle her sürümde artar
         versionName "1.0.0"  // Uygulama versiyon adı
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '1.8'
+    }
+
+    lintOptions {
+        disable 'InvalidPackage'
+        checkReleaseBuilds false
     }
 
     buildTypes {
