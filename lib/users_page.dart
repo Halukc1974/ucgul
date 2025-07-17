@@ -89,6 +89,7 @@ class _UsersPageState extends State<UsersPage> {
 
   // Yeni kullanıcıyı Firebase'e kaydetme fonksiyonu
   void _addUser() async {
+    bool acilistercih = false;
     String name = _nameController.text.trim();
     String surname = _surnameController.text.trim();
     String phone = _phoneController.text.trim();
@@ -114,6 +115,7 @@ class _UsersPageState extends State<UsersPage> {
     // Eğer tüm bilgiler girildiyse, Firebase'e ekleyelim
     if (name.isNotEmpty && surname.isNotEmpty ) {
       await FirebaseFirestore.instance.collection('users').add({
+        'acilistercih': acilistercih,
         'name': name,
         'surname': surname,
         'phone': phone,
