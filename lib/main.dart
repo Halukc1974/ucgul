@@ -14,6 +14,16 @@ void main() async {
   final birthdayService = BirthdayService();
   await birthdayService.initialize();
 
+  // Bildirim tıklama olaylarını dinle
+  AwesomeNotifications().setListeners(
+    onActionReceivedMethod: (receivedAction) async {
+      // Bildirime tıklandığında yapılacak işlemler
+      if (receivedAction.channelKey == 'birthday_channel') {
+        // İsterseniz burada özel bir sayfaya yönlendirme yapabilirsiniz
+      }
+    },
+  );
+
   // Günlük doğum günü kontrollerini başlat
   Future.delayed(Duration(seconds: 5), () {
     birthdayService.checkAndSendBirthdayNotifications();

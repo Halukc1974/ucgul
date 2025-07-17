@@ -1,23 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 class BirthdayService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
 
   Future<void> initialize() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    const IOSInitializationSettings initializationSettingsIOS =
-        IOSInitializationSettings();
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
+    await AwesomeNotifications().initialize(
+      'resource://drawable/ic_launcher',
+      [
+        NotificationChannel(
+          channelKey: 'birthday_channel',
+          channelName: 'Doğum Günü Bildirimleri',
+          channelDescription: 'Doğum günü hatırlatmaları için bildirim kanalı',
+          defaultColor: Colors.pink,
+          ledColor: Colors.white,
+          importance: NotificationImportance.High,
+        )
+      ],
     );
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+    // Bildirim izinlerini kontrol et ve iste
+    await AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+      if (!isAllowed) {
+        AwesomeNotifications().requestPermissionToSendNotifications();
+      }
+    });
   }
 
   Future<List<Map<String, dynamic>>> getUpcomingBirthdays() async {
@@ -94,23 +103,15 @@ class BirthdayService {
   }
 
   Future<void> _showNotification(String title, String body) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'birthday_channel',
-      'Doğum Günü Bildirimleri',
-      channelDescription: 'Doğum günü hatırlatmaları için bildirim kanalı',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
-    
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      title,
-      body,
-      platformChannelSpecifics,
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+        channelKey: 'birthday_channel',
+        title: title,
+        body: body,
+        notificationLayout: NotificationLayout.Default,
+        category: NotificationCategory.Social,
+      ),
     );
   }
 }
