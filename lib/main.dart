@@ -3,10 +3,26 @@ import 'package:firebase_core/firebase_core.dart';
 import './login_page.dart';
 import './home_page.dart';
 import './settings_service.dart';
+import './birthday_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(); // Firebase'i sadece bir kez başlat
+
+  // Doğum günü servisini başlat
+  final birthdayService = BirthdayService();
+  await birthdayService.initialize();
+
+  // Günlük doğum günü kontrollerini başlat
+  Future.delayed(Duration(seconds: 5), () {
+    birthdayService.checkAndSendBirthdayNotifications();
+  });
+
+  // Her gün kontrol et
+  const oneDay = Duration(days: 1);
+  Timer.periodic(oneDay, (timer) {
+    birthdayService.checkAndSendBirthdayNotifications();
+  });
 
   // Şifresiz giriş tercihini kontrol et
   final settingsService = SettingsService();

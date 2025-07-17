@@ -3,6 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'birthday_service.dart';
+import 'package:intl/intl.dart';
 
 class UsersPage extends StatefulWidget {
   const UsersPage({super.key});
@@ -39,10 +41,71 @@ class _UsersPageState extends State<UsersPage> {
 
   String selectedUserId = '';  // Seçilen kullanıcının ID'si (güncelleme için)
 
+  final BirthdayService _birthdayService = BirthdayService();
+  List<Map<String, dynamic>> upcomingBirthdays = [];
+
   @override
   void initState() {
     super.initState();
     _loadUsers();  // Firebase'den kullanıcı verilerini alıyoruz
+    _initializeBirthdayService();
+  }
+
+  void _initializeBirthdayService() async {
+    await _birthdayService.initialize();
+    // Her gün kontrol et
+    Future.delayed(Duration(seconds: 1), () {
+      _birthdayService.checkAndSendBirthdayNotifications();
+    });
+  }
+
+  void _showBirthdayCard(BuildContext context) async {
+    upcomingBirthdays = await _birthdayService.getUpcomingBirthdays();
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Yaklaşan Doğum Günleri 🎂'),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: upcomingBirthdays.length,
+              itemBuilder: (context, index) {
+                final user = upcomingBirthdays[index];
+                final nextBirthday = user['nextBirthday'] as DateTime;
+                final today = DateTime.now();
+                final difference = nextBirthday.difference(today).inDays;
+                
+                String timeText = '';
+                if (difference == 0) {
+                  timeText = 'Bugün';
+                } else if (difference == 1) {
+                  timeText = 'Yarın';
+                } else {
+                  timeText = '$difference gün sonra';
+                }
+
+                return ListTile(
+                  leading: Icon(Icons.cake, color: Colors.pink),
+                  title: Text('${user['name']} ${user['surname']}'),
+                  subtitle: Text('$timeText (${DateFormat('dd.MM').format(nextBirthday)})'),
+                );
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Kapat'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Kullanıcıları Firebase'den alıyoruz
@@ -521,8 +584,44 @@ class _UsersPageState extends State<UsersPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.grey.shade200,
+      appBar: AppBar(
+        backgroundColor: Colors.grey.shade200,
         title: const Text('Üye Listesi'),
+        actions: [
+          IconButton(
+            icon: Stack(
+              children: [
+                Icon(Icons.cake, color: Colors.pink),
+                if (upcomingBirthdays.isNotEmpty)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 12,
+                        minHeight: 12,
+                      ),
+                      child: Text(
+                        '${upcomingBirthdays.length}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            onPressed: () => _showBirthdayCard(context),
+            tooltip: 'Yaklaşan Doğum Günleri',
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: users.length,
