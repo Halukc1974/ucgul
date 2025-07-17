@@ -1,23 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class BirthdayService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
 
   Future<void> initialize() async {
-    final AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    final DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings();
-    final InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    // Boş initialize metodu
   }
 
   Future<List<Map<String, dynamic>>> getUpcomingBirthdays() async {
@@ -93,22 +82,35 @@ class BirthdayService {
     }
   }
 
-  Future<void> _showNotification(String title, String body) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'birthday_channel',
-      'Doğum Günü Bildirimleri',
-      importance: Importance.max,
-      priority: Priority.high,
+  void _showNotification(String title, String body) {
+    // Şimdilik SnackBar kullanarak bildirim göstereceğiz
+    final scaffoldMessenger = ScaffoldMessenger.of(
+      Navigator.of(
+        MaterialApp.navigatorKey?.currentContext ?? throw Exception('No context'),
+      ).context,
     );
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
     
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      title,
-      body,
-      platformChannelSpecifics,
+    scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(body),
+          ],
+        ),
+        duration: const Duration(seconds: 5),
+        action: SnackBarAction(
+          label: 'Tamam',
+          onPressed: () {
+            scaffoldMessenger.hideCurrentSnackBar();
+          },
+        ),
+      ),
     );
   }
 }

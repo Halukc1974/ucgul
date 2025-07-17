@@ -43,6 +43,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Üçgül Forever',
       debugShowCheckedModeBanner: false,
+      navigatorKey: GlobalKey<NavigatorState>(),
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
