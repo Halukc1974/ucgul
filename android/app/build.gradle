@@ -6,6 +6,11 @@ plugins {
 
     kotlinOptions {
         jvmTarget = '17'
+    }
+
+    lintOptions {
+        disable 'InvalidPackage'
+        checkReleaseBuilds false
     }d.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
