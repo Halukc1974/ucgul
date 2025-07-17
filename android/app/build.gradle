@@ -1,5 +1,12 @@
 plugins {
-    id "com.android.application"
+    id "co    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }d.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -13,6 +20,7 @@ android {
         applicationId "com.program.ucgul1"
         minSdkVersion 21
         targetSdkVersion 33
+        multiDexEnabled true
         multiDexEnabled true
         versionCode 1  // Uygulama versiyon kodu, genellikle her sürümde artar
         versionName "1.0.0"  // Uygulama versiyon adı
