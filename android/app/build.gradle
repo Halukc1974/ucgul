@@ -7,12 +7,12 @@ plugins {
 android {
     namespace = "com.program.ucgul1"  // Uygulamanın doğru namespace'i
 
-    compileSdkVersion 34
+    compileSdkVersion 35
 
     defaultConfig {
         applicationId "com.program.ucgul1"
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 35
         multiDexEnabled true
         multiDexEnabled true
         versionCode 1  // Uygulama versiyon kodu, genellikle her sürümde artar
@@ -20,8 +20,9 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -32,7 +33,7 @@ android {
         disable 'InvalidPackage'
         checkReleaseBuilds false
     }
-    
+
     buildToolsVersion "34.0.0"
 
     buildTypes {
@@ -48,6 +49,10 @@ android {
 
 flutter {
     source = "../.."  // Flutter SDK yolunun doğru olduğundan emin olun
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.3'
 }
 
 apply plugin: 'com.google.gms.google-services'  // Firebase'i etkinleştiren satır
