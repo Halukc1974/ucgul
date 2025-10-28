@@ -10,6 +10,13 @@
 .svn/
 migrate_working_dir/
 
+# Large files that shouldn't be in Git
+*.tar.gz
+*.tar.xz
+*.zip
+flutter/
+flutter.tar.xz
+
 # IntelliJ related
 *.iml
 *.ipr
