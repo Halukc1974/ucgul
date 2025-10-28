@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'birthday_service.dart';
 
 class UsersPage2 extends StatefulWidget {
   const UsersPage2({super.key});
@@ -15,6 +17,7 @@ class _UsersPageState extends State<UsersPage2> {
   String searchQuery = '';
   String selectedUserId = ''; // Seçilen kullanıcının ID'si (güncelleme için)
   final TextEditingController _searchController = TextEditingController();
+  final BirthdayService _birthdayService = BirthdayService();
 
   @override
   void initState() {
@@ -26,6 +29,7 @@ class _UsersPageState extends State<UsersPage2> {
         _filterUsers();
       });
     });
+    _birthdayService.initialize(); // Bildirim servisini başlat
   }
 
   void _loadUsers() async {
@@ -229,6 +233,56 @@ class _UsersPageState extends State<UsersPage2> {
     );
   }
 
+  void _showUpcomingBirthdays() async {
+    List<Map<String, dynamic>> birthdays = await _birthdayService.getUpcomingBirthdays();
+    if (birthdays.isNotEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Yaklaşan Doğum Günleri', style: TextStyle(fontWeight:  FontWeight.bold, fontSize: 16)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: birthdays.map((birthday) {
+                String dateStr = '';
+                if (birthday['nextBirthday'] != null && birthday['nextBirthday'] is DateTime) {
+                  try {
+                    dateStr = DateFormat('dd.MM.yyyy').format(birthday['nextBirthday']);
+                  } catch (e) {
+                    dateStr = '';
+                  }
+                }
+                return Text('${birthday['name']} ${birthday['surname']} - $dateStr');
+              }).toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Kapat'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Bilgi'),
+            content: Text('Yaklaşan doğum günü bulunmamaktadır.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Tamam'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -239,6 +293,10 @@ class _UsersPageState extends State<UsersPage2> {
           children: [
             Expanded(child: Image.asset('assets/images/ucgul.png')),
             const SizedBox(width: 10),
+            IconButton(
+              icon: Icon(Icons.cake, color: Colors.red,),
+              onPressed: _showUpcomingBirthdays,
+            ),
           ],
         ),
       ),

@@ -3,10 +3,13 @@ import 'package:firestoredeneme/lodges_page2.dart';
 import 'package:firestoredeneme/login_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'admin_page.dart'; // AdminPage'e yönlendirme için
 import 'text_styles.dart';
 import 'users_page2.dart';
 import 'change_password_page.dart';
+import 'birthday_service.dart';
+import 'settings_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,10 +38,8 @@ class _HomePageState extends State<HomePage> {
   // Veritabanından alınacak değer
   // late final bool _acilIsTercih = true;  // Varsayılan olarak true, Firestore'dan alınacak
 
-
-
-
-
+  final BirthdayService _birthdayService = BirthdayService();
+  final SettingsService _settingsService = SettingsService();
 
   @override
   void initState() {
@@ -49,7 +50,71 @@ class _HomePageState extends State<HomePage> {
       selectedDateIndex = availableDates.indexOf(selectedDate);
       _loadTextsForSelectedDate(selectedDate);
     }
-  //  _getUserSettings();  // Load user settings after fetching the data
+    _birthdayService.initialize(); // Bildirim servisini başlat
+    _settingsService.initializeNotifications(); // Sistem mesajları için bildirimleri başlat
+    // _checkUpcomingBirthdays(); // Bunu kaldırdık, sadece ikon tıklanınca çalışacak
+    _sendSystemMessages();
+  }
+
+  void _sendSystemMessages() async {
+    List<Map<String, dynamic>> birthdays = await _birthdayService.getUpcomingBirthdays();
+    for (var birthday in birthdays) {
+      _settingsService.showSystemMessage(
+        'Yaklaşan Doğum Günü',
+        '${birthday['name']} ${birthday['surname']} - ${DateFormat('dd.MM.yyyy').format(birthday['nextBirthday'])}',
+      );
+    }
+  }
+
+  void _checkUpcomingBirthdays() async {
+    List<Map<String, dynamic>> birthdays = await _birthdayService.getUpcomingBirthdays();
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (context) {
+        if (birthdays.isNotEmpty) {
+          return AlertDialog(
+            title: Text('Yaklaşan Doğum Günleri', style: TextStyle(fontWeight:  FontWeight.bold, fontSize: 16)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: birthdays.map((birthday) {
+                return Text('${birthday['name']} ${birthday['surname']} - ${DateFormat('dd.MM.yyyy').format(birthday['nextBirthday'])}');
+              }).toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Kapat'),
+              ),
+            ],
+          );
+        } else {
+          return AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.cake, color: Colors.red),
+                SizedBox(width: 8),
+                Text('Doğum Günü Bilgisi'),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Yaklaşan doğum günü bulunmamaktadır.'),
+               // SizedBox(height: 12),
+               // Text('Yine de kutlamak isterseniz, herkese mutlu günler! 🎉', style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Tamam'),
+              ),
+            ],
+          );
+        }
+      },
+    );
   }
 
   // Bugünden sonraki ilk Çarşamba tarihini bulan fonksiyon
@@ -184,6 +249,10 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
+          IconButton(
+            icon: Icon(Icons.cake, color: Colors.red,),
+            onPressed: _checkUpcomingBirthdays,
+          ),
         ],
       ),
       body: Column(
@@ -196,9 +265,9 @@ class _HomePageState extends State<HomePage> {
               child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                 // SizedBox(height: 10),
+                  // SizedBox(height: 10),
                   Text(selectedDate, style: MainHeader3),
-                //  SizedBox(height: 10),
+                  //  SizedBox(height: 10),
                   Text('I. D:. Çalışması:', style: MainHeader),
                   // Bu kısımdaki metni kaydırılabilir yapmak için SingleChildScrollView ekliyoruz
                   Expanded(
@@ -210,7 +279,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                //  SizedBox(height: 8),
+                  //  SizedBox(height: 8),
                   Text('II. D:. Çalışması:', style: MainHeader),
                   Flexible(
                     child: SizedBox(height: 50,
@@ -223,7 +292,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                //  SizedBox(height: 8),
+                  //  SizedBox(height: 8),
                   Text('III. D:. Çalışması:', style: MainHeader),
                   Expanded(
                     child: SingleChildScrollView(
@@ -234,7 +303,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-               //   SizedBox(height: 8),
+                  //   SizedBox(height: 8),
                   Text('Kardeş Sofrası', style: MainHeader),
                   SizedBox(height: 50,
                     child: SingleChildScrollView(
@@ -253,25 +322,23 @@ class _HomePageState extends State<HomePage> {
           // Cupertino Widget (Tarihler)
           SizedBox(
             height: 120,
-            child: Expanded(
-              child: CupertinoPicker(
-                diameterRatio: .8,
-                useMagnifier: true,
-                magnification: 1.12,
-                itemExtent: 40, // Her öğe için yüksekliği belirliyoruz
-                onSelectedItemChanged: (index) {
-                  setState(() {
-                    selectedDate = availableDates[index];
-                    selectedDateIndex = index;
-                  });
-                  _loadTextsForSelectedDate(selectedDate);
-                },
-                scrollController:
-                FixedExtentScrollController(initialItem: selectedDateIndex),
-                children: availableDates.map((date) {
-                  return Text(date);
-                }).toList(),
-              ),
+            child: CupertinoPicker(
+              diameterRatio: .8,
+              useMagnifier: true,
+              magnification: 1.12,
+              itemExtent: 40, // Her öğe için yüksekliği belirliyoruz
+              onSelectedItemChanged: (index) {
+                setState(() {
+                  selectedDate = availableDates[index];
+                  selectedDateIndex = index;
+                });
+                _loadTextsForSelectedDate(selectedDate);
+              },
+              scrollController:
+              FixedExtentScrollController(initialItem: selectedDateIndex),
+              children: availableDates.map((date) {
+                return Text(date);
+              }).toList(),
             ),
           ),
         ],

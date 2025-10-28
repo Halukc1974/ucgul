@@ -18,86 +18,105 @@ class BirthdayService {
 
   Future<List<Map<String, dynamic>>> getUpcomingBirthdays() async {
     final now = DateTime.now();
-    final oneWeekLater = now.add(Duration(days: 7));
-    
+    final tenDaysLater = now.add(Duration(days: 10));
+
     QuerySnapshot snapshot = await _firestore.collection('users').get();
     List<Map<String, dynamic>> upcomingBirthdays = [];
 
     for (var doc in snapshot.docs) {
       final userData = doc.data() as Map<String, dynamic>;
-      if (userData['dogum'] != null) {
-        final birthday = DateFormat('dd.MM.yyyy').parse(userData['dogum']);
-        final nextBirthday = DateTime(
-          now.year,
-          birthday.month,
-          birthday.day,
-        );
-
-        // Eğer bu yılki doğum günü geçtiyse, gelecek yılınkini kontrol et
-        if (nextBirthday.isBefore(now)) {
-          nextBirthday.add(Duration(days: 365));
-        }
-
-        // Bir hafta içinde olan doğum günlerini kontrol et
-        if (nextBirthday.isAfter(now.subtract(Duration(days: 1))) &&
-            nextBirthday.isBefore(oneWeekLater)) {
-          upcomingBirthdays.add({
-            ...userData,
-            'nextBirthday': nextBirthday,
-            'id': doc.id,
-          });
+      final dogumStr = userData['dogum'];
+      if (dogumStr != null && dogumStr is String && dogumStr.isNotEmpty) {
+        try {
+          final birthday = DateFormat('dd.MM.yyyy').parse(dogumStr);
+          var nextBirthday = DateTime(
+            now.year,
+            birthday.month,
+            birthday.day,
+          );
+          // Eğer bu yılki doğum günü geçtiyse, gelecek yılınkini kontrol et
+          if (nextBirthday.isBefore(now)) {
+            nextBirthday = nextBirthday.add(Duration(days: 365));
+          }
+          // 10 gün içinde olan doğum günlerini kontrol et
+          if (nextBirthday.isAfter(now.subtract(Duration(days: 1))) &&
+              nextBirthday.isBefore(tenDaysLater)) {
+            upcomingBirthdays.add({
+              ...userData,
+              'nextBirthday': nextBirthday,
+              'id': doc.id,
+            });
+          }
+        } catch (e) {
+          // Hatalı tarih formatı, logla veya yut
+          continue;
         }
       }
     }
 
     // Tarihe göre sırala
-    upcomingBirthdays.sort((a, b) => 
-      (a['nextBirthday'] as DateTime).compareTo(b['nextBirthday'] as DateTime));
+    upcomingBirthdays.sort((a, b) =>
+        (a['nextBirthday'] as DateTime).compareTo(b['nextBirthday'] as DateTime));
 
     return upcomingBirthdays;
   }
 
   Future<void> checkAndSendBirthdayNotifications() async {
     final now = DateTime.now();
+    final tomorrow = DateTime(now.year, now.month, now.day + 1); // Yarın
+    final tenDaysLater = now.add(Duration(days: 10));
+
     QuerySnapshot snapshot = await _firestore.collection('users').get();
 
     for (var doc in snapshot.docs) {
       final userData = doc.data() as Map<String, dynamic>;
-      if (userData['dogum'] != null) {
-        final birthday = DateFormat('dd.MM.yyyy').parse(userData['dogum']);
-        final nextBirthday = DateTime(
-          now.year,
-          birthday.month,
-          birthday.day,
-        );
+      final dogumStr = userData['dogum'];
 
-        // Doğum günü yarın ise
-        if (nextBirthday.difference(now).inDays == 1) {
-          _showNotification(
-            '🎂 Yaklaşan Doğum Günü',
-            '${userData['name']} ${userData['surname']}\'in doğum günü yarın!',
-          );
-        }
-        // Doğum günü bugün ise
-        else if (birthday.month == now.month && birthday.day == now.day) {
-          _showNotification(
-            '🎉 Bugün Doğum Günü',
-            '${userData['name']} ${userData['surname']}\'in doğum günü bugün!',
-          );
+      if (dogumStr != null && dogumStr is String && dogumStr.isNotEmpty) {
+        try {
+          final birthday = DateFormat('dd.MM.yyyy').parse(dogumStr);
+          var nextBirthday = DateTime(now.year, birthday.month, birthday.day);
+
+          // Eğer doğum günü bu yıl geçtiyse, bir sonraki yılın doğum günü
+          if (nextBirthday.isBefore(now)) {
+            nextBirthday = DateTime(now.year + 1, birthday.month, birthday.day);
+          }
+
+          // Yarın kontrolü: Eğer doğum günü yarınsa
+          if (nextBirthday.isAtSameMomentAs(tomorrow)) {
+            _showNotification(
+              '🎂 Yaklaşan Doğum Günü',
+              '${userData['name']} ${userData['surname']}\'in doğum günü yarın!',
+              durationSeconds: 3,
+            );
+          }
+          // Bugün doğum günü kontrolü: Eğer doğum günü bugünse
+          else if (nextBirthday.isAtSameMomentAs(now)) {
+            _showNotification(
+              '🎉 Bugün Doğum Günü',
+              '${userData['name']} ${userData['surname']}\'in doğum günü bugün!',
+              durationSeconds: 3,
+            );
+          }
+        } catch (e) {
+          // Hatalı tarih formatı, logla veya yut
+          continue;
         }
       }
     }
   }
 
-  Future<void> _showNotification(String title, String body) async {
+
+  Future<void> _showNotification(String title, String body, {int durationSeconds = 3}) async {
     try {
       await platform.invokeMethod('showNotification', {
         'title': title,
         'body': body,
         'id': DateTime.now().millisecondsSinceEpoch.remainder(100000),
+        'duration': durationSeconds,
       });
     } on PlatformException catch (e) {
-      print('Failed to show notification: ${e.message}');
+      print('Failed to show notification: e.message}');
     }
   }
 }
