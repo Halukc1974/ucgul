@@ -1,16 +1,68 @@
-# ucgul_forever
+# Üçgül Forever
 
-A new Flutter project.
+Flutter ile geliştirilen Üçgül Forever uygulaması.
 
-## Getting Started
+## Sistem Gereksinimleri
 
-This project is a starting point for a Flutter application.
+### Android
+- **Minimum:** Android 6.0 (API level 23)
+- **Target:** Android 15 (API level 35)
+- **Desteklenen mimariler:** arm64-v8a, armeabi-v7a, x86_64
 
-A few resources to get you started if this is your first Flutter project:
+### iOS
+- **Minimum:** iOS 12.0+
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Web
+- Modern web tarayıcıları (Chrome, Firefox, Safari, Edge)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Desktop
+- Windows 10+
+- macOS 10.14+
+- Linux (Ubuntu 18.04+)
+
+## Özellikler
+
+- Firebase Authentication
+- Cloud Firestore database
+- Local notifications
+- Secure storage
+- Multi-platform support
+
+## Geliştirme
+
+```bash
+# Dependencies yükle
+flutter pub get
+
+# Debug modda çalıştır
+flutter run
+
+# Release APK build et
+flutter build apk --release
+
+# Web build et
+flutter build web
+
+# Test et
+flutter test
+```
+
+## Build Gereksinimleri
+
+- Flutter SDK 3.24.5+
+- Dart SDK 3.5.4+
+- Android SDK 35
+- Gradle 8.3+
+- Java 17+
+
+## Firebase Konfigürasyonu
+
+Uygulama Firebase kullanıyor. Kendi Firebase projenizi oluşturun ve:
+
+1. `android/app/google-services.json` ekleyin
+2. `ios/Runner/GoogleService-Info.plist` ekleyin
+3. Web için Firebase config'i `web/index.html`'e ekleyin
+
+## Lisans
+
+Bu proje özel kullanım içindir.

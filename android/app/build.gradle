@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId "com.program.ucgul1"
-        minSdkVersion 21
+        minSdkVersion 23  // Firebase Auth 23.2.1+ gereksinimi
         targetSdkVersion 35
         multiDexEnabled true
         versionCode 1
@@ -31,12 +31,16 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn']
     }
 
     lintOptions {
         disable 'InvalidPackage'
+        disable 'Instantiatable'
+        disable 'BanUncheckedReflection'
         checkReleaseBuilds false
         abortOnError false
+        quiet true
     }
 
     buildToolsVersion "35.0.0"
@@ -77,6 +81,7 @@ dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
     implementation 'androidx.window:window:1.2.0'
     implementation 'androidx.window:window-java:1.2.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

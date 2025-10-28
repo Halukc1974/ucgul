@@ -20,7 +20,7 @@
     
     <!-- Minimum SDK version tanımı -->
     <uses-sdk
-        android:minSdkVersion="21"
+        android:minSdkVersion="23"
         android:targetSdkVersion="35" />
 
     <application
