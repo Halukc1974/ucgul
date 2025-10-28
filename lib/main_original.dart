@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart'; // kIsWeb için
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import './firebase_options.dart';
@@ -14,25 +13,22 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   ); // Firebase'i platform'a göre başlat
 
-  // Web platformunda bildirim servisi sorun çıkarabilir, sadece mobil/desktop'ta çalıştır
-  if (!kIsWeb) {
-    // Doğum günü servisini başlat
-    final birthdayService = BirthdayService();
-    await birthdayService.initialize();
+  // Doğum günü servisini başlat
+  final birthdayService = BirthdayService();
+  await birthdayService.initialize();
 
-    // Native bildirim sistemi başlatıldı
+  // Native bildirim sistemi başlatıldı
 
-    // Günlük doğum günü kontrollerini başlat
-    Future.delayed(Duration(seconds: 5), () {
-      birthdayService.checkAndSendBirthdayNotifications();
-    });
+  // Günlük doğum günü kontrollerini başlat
+  Future.delayed(Duration(seconds: 5), () {
+    birthdayService.checkAndSendBirthdayNotifications();
+  });
 
-    // Her gün kontrol et
-    const oneDay = Duration(days: 1);
-    Timer.periodic(oneDay, (timer) {
-      birthdayService.checkAndSendBirthdayNotifications();
-    });
-  }
+  // Her gün kontrol et
+  const oneDay = Duration(days: 1);
+  Timer.periodic(oneDay, (timer) {
+    birthdayService.checkAndSendBirthdayNotifications();
+  });
 
   // Şifresiz giriş tercihini kontrol et
   final settingsService = SettingsService();
